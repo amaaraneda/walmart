@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Plataforma operativa para supervisar disponibilidad visual en góndolas." />
+    <title>Góndola Visión | Operaciones</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="login-screen" class="login-layout">
+      <section class="login-brand" aria-label="Góndola Visión">
+        <div class="brand-lockup"><span class="brand-symbol">GV</span><span>Góndola<br>Visión</span></div>
+        <div class="login-copy"><p class="kicker">OPERACIONES DE SALA</p><h1>Disponibilidad visual con trazabilidad.</h1><p>Supervisa zonas de góndola, gestiona responsables y prepara la operación para el análisis automatizado.</p></div>
+        <div class="login-note"><span class="pulse"></span> Entorno de demostración local</div>
+      </section>
+      <section class="login-panel">
+        <form id="login-form" class="auth-card">
+          <p class="kicker">ACCESO SEGURO</p><h2>Iniciar sesión</h2><p class="subtle">Ingresa con una cuenta autorizada para continuar.</p>
+          <label>Correo electrónico<input id="login-email" type="email" autocomplete="email" placeholder="nombre@empresa.cl" required></label>
+          <label>Contraseña<input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••" required></label>
+          <p class="form-error hidden" id="login-error" role="alert"></p>
+          <button class="button primary wide" type="submit">Ingresar <span>→</span></button>
+          <div class="demo-credentials"><strong>Cuentas de demostración</strong><button type="button" data-demo="admin">Administrador técnico</button><button type="button" data-demo="supervisor">Supervisor</button><button type="button" data-demo="reponedor">Reponedor</button></div>
+        </form>
+      </section>
+    </main>
+
+    <div id="app-shell" class="app-shell hidden">
+      <aside class="sidebar">
+        <div class="brand-lockup"><span class="brand-symbol">GV</span><span>Góndola<br>Visión</span></div>
+        <p class="sidebar-label">OPERACIÓN</p>
+        <nav aria-label="Navegación principal">
+          <button class="nav-link active" data-route="dashboard"><span>▦</span> Resumen</button>
+          <button class="nav-link" data-route="zones"><span>⌗</span> Zonas de góndola</button>
+          <button class="nav-link" data-route="users" data-admin-only><span>◉</span> Usuarios</button>
+          <button class="nav-link disabled" title="Módulo siguiente"><span>!</span> Alertas <small>Próx.</small></button>
+        </nav>
+        <div class="sidebar-bottom"><p class="sidebar-label">ESTADO</p><div class="environment"><span class="pulse"></span><span><strong>Fase 2</strong><small>Frontend local</small></span></div></div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar"><button id="mobile-menu" class="icon-button mobile-only" aria-label="Abrir menú">☰</button><div><p class="kicker" id="page-kicker">OPERACIÓN</p><h1 id="page-title">Resumen operativo</h1></div><div class="user-menu"><div class="avatar" id="user-avatar">AA</div><div><strong id="current-user-name">—</strong><small id="current-user-role">—</small></div><button id="logout-button" class="icon-button" aria-label="Cerrar sesión" title="Cerrar sesión">↪</button></div></header>
+
+        <section id="dashboard-view" class="view active">
+          <div class="context-bar"><div><strong>Turno actual</strong><span>Supervisión de disponibilidad visual</span></div><span class="status-chip info">Demo local</span></div>
+          <div class="metric-grid"><article class="metric-card"><span class="metric-icon blue">⌗</span><div><small>Zonas activas</small><strong id="metric-zones">0</strong><span class="metric-detail">listas para análisis</span></div></article><article class="metric-card"><span class="metric-icon amber">!</span><div><small>Alertas simuladas</small><strong>2</strong><span class="metric-detail">módulo siguiente</span></div></article><article class="metric-card"><span class="metric-icon green">◉</span><div><small>Usuarios activos</small><strong id="metric-users">0</strong><span class="metric-detail">con acceso vigente</span></div></article></div>
+          <div class="dashboard-grid"><article class="surface"><div class="surface-head"><div><h2>Zonas a supervisar</h2><p>Configuración disponible para el módulo de análisis.</p></div><button class="text-button" data-goto="zones">Ver zonas →</button></div><div id="dashboard-zones" class="compact-list"></div></article><article class="surface next-module"><p class="kicker">SIGUIENTE MÓDULO</p><h2>Alertas de disponibilidad</h2><p>Cuando se integre el modelo, aquí se mostrarán las zonas con disponibilidad visual menor al umbral definido.</p><div class="threshold-preview"><span>Umbral operativo</span><strong>30 %</strong></div></article></div>
+        </section>
+
+        <section id="zones-view" class="view">
+          <div class="view-toolbar"><div><h2>Zonas de góndola</h2><p>Define las áreas que recibirán resultados de análisis y alertas.</p></div><button class="button primary" data-open-form="zone">+ Nueva zona</button></div>
+          <div class="filter-row"><label class="search"><span>⌕</span><input id="zone-search" placeholder="Buscar por nombre, código o ubicación"></label><label class="filter-select">Estado<select id="zone-status-filter"><option value="all">Todos</option><option value="active">Activas</option><option value="inactive">Inactivas</option></select></label></div>
+          <article class="surface table-surface"><div class="table-wrap"><table><thead><tr><th>Código</th><th>Zona</th><th>Ubicación</th><th>Umbral</th><th>Estado</th><th aria-label="Acciones"></th></tr></thead><tbody id="zones-table"></tbody></table></div><div id="zones-empty" class="empty-state hidden"><strong>No se encontraron zonas</strong><span>Ajusta los filtros o crea una nueva zona.</span></div></article>
+        </section>
+
+        <section id="users-view" class="view">
+          <div class="view-toolbar"><div><h2>Usuarios</h2><p>Administra cuentas y roles de acceso a la plataforma.</p></div><button class="button primary" data-open-form="user">+ Nuevo usuario</button></div>
+          <div class="filter-row"><label class="search"><span>⌕</span><input id="user-search" placeholder="Buscar por nombre o correo"></label><label class="filter-select">Rol<select id="user-role-filter"><option value="all">Todos los roles</option><option value="Administrador técnico">Administrador técnico</option><option value="Supervisor">Supervisor</option><option value="Reponedor">Reponedor</option></select></label></div>
+          <article class="surface table-surface"><div class="table-wrap"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th aria-label="Acciones"></th></tr></thead><tbody id="users-table"></tbody></table></div><div id="users-empty" class="empty-state hidden"><strong>No se encontraron usuarios</strong><span>Ajusta los filtros o crea un nuevo usuario.</span></div></article>
+        </section>
+      </section>
+    </div>
+
+    <dialog id="entity-dialog" class="dialog"><form id="entity-form" method="dialog"><div class="dialog-head"><div><p class="kicker" id="dialog-kicker">CONFIGURACIÓN</p><h2 id="dialog-title">Nueva zona</h2></div><button class="icon-button" type="button" data-close-dialog aria-label="Cerrar">×</button></div><div id="form-fields" class="form-grid"></div><p id="entity-form-error" class="form-error hidden"></p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog>Cancelar</button><button class="button primary" type="submit" id="save-entity">Guardar</button></div></form></dialog>
+    <dialog id="confirm-dialog" class="dialog confirm-dialog"><div><span class="warning-icon">!</span><p class="kicker">CONFIRMAR ACCIÓN</p><h2 id="confirm-title">¿Desactivar registro?</h2><p id="confirm-copy" class="subtle">La información se conservará para trazabilidad, pero dejará de estar disponible para operación.</p><div class="dialog-actions"><button class="button secondary" data-close-confirm>Cancelar</button><button class="button danger" id="confirm-action">Desactivar</button></div></div></dialog>
+    <div id="toast" class="toast hidden" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
