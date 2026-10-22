@@ -1,0 +1,12 @@
+.git
+.venv
+artifacts
+data
+tests
+docs
+mockups
+outputs
+*.zip
+*.pdf
+*.docx
+*.xlsx

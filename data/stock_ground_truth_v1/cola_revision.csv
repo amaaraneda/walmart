@@ -1,0 +1,15 @@
+image,priority,role,status,note
+supermarket_021.jpg,1,gap_candidate,pending_review,hueco visible en nivel de cereales
+supermarket_022.jpg,1,gap_candidate,pending_review,frentes parciales en bebidas; distinguir aire sobre productos
+supermarket_036.jpg,1,gap_candidate,pending_review,huecos en varios niveles
+supermarket_041.jpg,1,hard_negative,pending_review,cartel y headroom causaron falsos positivos
+supermarket_001.jpg,1,full_candidate,pending_review,verificar niveles aparentemente llenos
+supermarket_002.jpg,1,full_candidate,pending_review,verificar niveles aparentemente llenos
+supermarket_012.jpg,2,full_candidate,pending_review,negativo denso
+supermarket_025.jpg,2,full_candidate,pending_review,negativo denso
+supermarket_026.jpg,2,full_candidate,pending_review,negativo denso
+supermarket_020.jpg,2,occlusion_case,pending_review,vidrio y reflejos
+supermarket_031.jpg,2,scene_group_check,pending_review,comparar con supermercado_032
+supermarket_032.jpg,2,scene_group_check,pending_review,comparar con supermercado_031
+supermarket_004.jpg,3,duplicate_canonical,pending_review,mismo SHA-256 que 035
+supermarket_035.jpg,3,duplicate_exclude,excluded_exact_duplicate,mismo SHA-256 que 004

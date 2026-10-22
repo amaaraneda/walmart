@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Etiquetador de góndolas · Piloto</title>
+<style>
+  :root{font:15px system-ui,sans-serif;color:#17283b;background:#f0f3f7}*{box-sizing:border-box}
+  body{margin:0}header{background:#102c43;color:white;padding:16px 24px}h1{font-size:22px;margin:0}p{line-height:1.45}
+  main{display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px;min-height:calc(100vh - 65px)}
+  aside,.stage{background:white;border:1px solid #d7e0e8;border-radius:12px;padding:18px}
+  label{display:block;font-weight:650;margin:12px 0 4px}input,select,button{font:inherit}input:not([type=file]),select{width:100%;padding:8px;border:1px solid #b9c6d2;border-radius:6px}
+  input[type=file]{max-width:100%}button{border:0;border-radius:7px;background:#123a57;color:white;padding:9px 12px;cursor:pointer;margin:4px 4px 4px 0}button:disabled{opacity:.45;cursor:not-allowed}
+  button.alt{background:#e5ebf0;color:#102c43}.row{display:flex;flex-wrap:wrap;gap:3px;margin-top:10px}.hint{font-size:13px;color:#526576}
+  #message{padding:9px;border-radius:6px;background:#e8f1fb;min-height:36px;margin-top:12px}
+  .canvas-wrap{overflow:auto;background:#1d2a34;min-height:450px;display:grid;place-items:center}canvas{max-width:100%;height:auto;cursor:crosshair;display:block}
+  .legend{display:flex;gap:20px;font-size:13px;margin:10px 0}.legend span:before{content:' ';display:inline-block;width:13px;height:13px;margin-right:6px}.roi:before{background:#2fd5a4}.gap:before{background:#f46e63}
+  @media(max-width:850px){main{grid-template-columns:1fr}}
+</style>
+<header><h1>Etiquetado visual de góndolas</h1></header>
+<main>
+  <aside>
+    <p class="hint">Herramienta local: la fotografía permanece en este navegador. Los polígonos son referencia humana, no predicciones del modelo.</p>
+    <label for="photo">Fotografía</label><input id="photo" type="file" accept="image/*">
+    <label for="existing">Reabrir anotación JSON (opcional)</label><input id="existing" type="file" accept="application/json,.json">
+    <label for="candidates">Propuestas del modelo (opcional)</label><input id="candidates" type="file" accept="application/json,.json">
+    <label for="scene">ID de escena</label><input id="scene" placeholder="tienda-pasillo-camara-toma">
+    <label for="split">Partición (decidir por escena)</label><select id="split"><option value="">Pendiente</option><option>train</option><option>val</option><option>test</option></select>
+    <label for="level">Nivel actual</label><input id="level" value="nivel_1">
+    <label for="visibility">Visibilidad</label><select id="visibility"><option value="clear">Clara</option><option value="occluded">Ocluida</option><option value="unusable">No evaluable</option></select>
+    <p class="hint">1. Dibujar el frente útil del nivel y cerrar polígono. 2. Dibujar cada hueco real. 3. Guardar nivel. Repetir para los demás niveles.</p>
+    <div class="row"><button id="roi">Dibujar ROI</button><button id="gap">Dibujar hueco</button><button id="close">Cerrar polígono</button><button id="undo" class="alt">Deshacer punto</button></div>
+    <div class="row"><button id="saveLevel">Guardar nivel</button><button id="removeLevel" class="alt">Eliminar nivel</button></div>
+    <label for="review">Estado</label><select id="review"><option value="draft">Borrador</option><option value="reviewed">Revisado completamente</option></select>
+    <div class="row"><button id="download">Descargar JSON</button></div>
+    <div id="message" role="status">Selecciona una fotografía para empezar.</div>
+    <p class="hint">Guarda el JSON en <code>data/stock_ground_truth_v1/annotations/</code>. Sin ROI o con partición pendiente, sólo podrás guardar un borrador; el validador lo rechazará para evaluación.</p>
+  </aside>
+  <section class="stage"><div class="legend"><span class="roi">Frente útil (ROI)</span><span class="gap">Hueco confirmado</span><span>Cajas rojas: propuestas sin validar</span></div><div class="canvas-wrap"><canvas id="canvas"></canvas></div><p id="levels" class="hint">Niveles guardados: ninguno.</p></section>
+</main>
+<script>
+const $=id=>document.getElementById(id), canvas=$('canvas'), ctx=canvas.getContext('2d');
+let image=new Image(), imageName='', levels=[], mode='', points=[], current={roi:null,gaps:[]}, candidateData=null;
+const say=msg=>$('message').textContent=msg;
+function drawPoly(poly,color,fill){if(!poly||!poly.length)return;ctx.beginPath();ctx.moveTo(...poly[0]);for(const point of poly.slice(1))ctx.lineTo(...point);if(poly.length>2)ctx.closePath();ctx.fillStyle=fill;ctx.strokeStyle=color;ctx.lineWidth=Math.max(2,canvas.width/300);if(poly.length>2)ctx.fill();ctx.stroke();for(const [x,y] of poly){ctx.beginPath();ctx.arc(x,y,Math.max(3,canvas.width/180),0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}}
+function render(){if(!imageName)return;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0);const proposal=candidateData?.images?.find(item=>item.image===imageName);if(proposal){ctx.save();ctx.strokeStyle='#f03038';ctx.lineWidth=Math.max(2,canvas.width/300);ctx.setLineDash([12,8]);for(const box of proposal.regions||[]){const [x1,y1,x2,y2]=box.xyxy;ctx.strokeRect(x1,y1,x2-x1,y2-y1)}ctx.restore()}for(const level of levels){drawPoly(level.roi,'#00b889','#26dda530');for(const gap of level.gaps)drawPoly(gap,'#f05246','#f46e6350')}drawPoly(current.roi,'#00b889','#26dda530');for(const gap of current.gaps)drawPoly(gap,'#f05246','#f46e6350');drawPoly(points,mode==='roi'?'#00b889':'#f05246','#ffffff00');$('levels').textContent='Niveles guardados: '+(levels.map(l=>l.id).join(', ')||'ninguno')}
+function reset(){levels=[];mode='';points=[];current={roi:null,gaps:[]};$('level').value='nivel_1';$('scene').value='';$('split').value='';$('review').value='draft';render()}
+$('photo').onchange=()=>{const file=$('photo').files[0];if(!file)return;imageName=file.name;image.onload=()=>{canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;reset();say(`${imageName}: ${canvas.width} × ${canvas.height} píxeles`)};image.src=URL.createObjectURL(file)};
+canvas.onclick=e=>{if(!imageName||!mode)return;const r=canvas.getBoundingClientRect();points.push([Math.min(canvas.width-1,Math.max(0,Math.round((e.clientX-r.left)*canvas.width/r.width))),Math.min(canvas.height-1,Math.max(0,Math.round((e.clientY-r.top)*canvas.height/r.height)))]);render()};
+$('roi').onclick=()=>{mode='roi';points=[];say('Haz clic en los vértices del frente útil; luego pulsa Cerrar polígono.')};
+$('gap').onclick=()=>{if(!current.roi){say('Primero guarda una ROI del nivel actual.');return}mode='gap';points=[];say('Marca sólo un faltante real dentro de la ROI.')};
+$('undo').onclick=()=>{points.pop();render()};
+$('close').onclick=()=>{if(points.length<3){say('El polígono necesita al menos tres puntos.');return}if(mode==='roi'){current.roi=points.map(p=>[...p]);current.gaps=[]}else if(mode==='gap'){current.gaps.push(points.map(p=>[...p]))}else{say('Elige ROI o hueco primero.');return}points=[];mode='';render();say('Polígono guardado en el nivel actual.')};
+$('saveLevel').onclick=()=>{const id=$('level').value.trim(), visibility=$('visibility').value;if(!id){say('Falta el ID de nivel.');return}if(levels.some(l=>l.id===id)){say('Ese ID de nivel ya existe. Usa otro o elimina el anterior.');return}if(visibility==='clear'&&!current.roi){say('Un nivel claro necesita ROI, aunque no tenga huecos.');return}levels.push({id,visibility,roi:current.roi,gaps:current.gaps});current={roi:null,gaps:[]};points=[];mode='';$('level').value=`nivel_${levels.length+1}`;render();say(`Nivel ${id} guardado.`)};
+$('removeLevel').onclick=()=>{const id=prompt('ID exacto del nivel que deseas eliminar:');if(!id)return;const old=levels.length;levels=levels.filter(l=>l.id!==id);render();say(old===levels.length?'No se encontró ese nivel.':`Nivel ${id} eliminado.`)};
+$('existing').onchange=async()=>{const file=$('existing').files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.image!==imageName||data.width!==canvas.width||data.height!==canvas.height)throw Error('El JSON no corresponde a la imagen seleccionada.');levels=data.shelves||[];$('scene').value=data.scene_id||'';$('split').value=data.split||'';$('review').value=data.review_status||'draft';current={roi:null,gaps:[]};points=[];mode='';render();say('Anotación recuperada.')}catch(error){say(`No se pudo abrir: ${error.message}`)}};
+$('candidates').onchange=async()=>{const file=$('candidates').files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.images))throw Error('Formato de propuestas inválido.');candidateData=data;render();const n=data.images.find(item=>item.image===imageName)?.candidate_count;say(n===undefined?'Propuestas cargadas; la imagen actual no tiene registro.':`${n} propuestas visibles. Son hipótesis, no etiquetas.`)}catch(error){say(`No se pudo abrir: ${error.message}`)}};
+$('download').onclick=()=>{if(!imageName){say('Selecciona una foto.');return}if(current.roi||current.gaps.length||points.length){say('Guarda o descarta el nivel/polígono en curso antes de descargar.');return}if(!levels.length){say('Guarda al menos un nivel.');return}const scene=$('scene').value.trim(),split=$('split').value,review=$('review').value;if(review==='reviewed'&&(!scene||!split||levels.some(l=>l.visibility==='clear'&&!l.roi))){say('Para marcar revisado, completa escena, partición y ROI de cada nivel claro.');return}const data={version:1,image:imageName,scene_id:scene||'PENDIENTE',split:split||'PENDIENTE',width:canvas.width,height:canvas.height,review_status:review,shelves:levels};const blob=new Blob([JSON.stringify(data,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=imageName.replace(/\.[^.]+$/,'')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('JSON descargado. Muévelo a annotations/ y ejecuta el validador.')};
+</script>
+</html>

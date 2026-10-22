@@ -1,0 +1,24 @@
+# Datos, resultados y archivos temporales locales
+data/raw/
+data/interim/
+data/processed/
+data/stock_ground_truth_v1/images/
+data/stock_ground_truth_v1/annotations/
+data/shelf_products_v2/
+data/standardized_yolo_v1/images/
+data/standardized_yolo_v1/labels/
+data/gap_detection_public/
+artifacts/
+DATASETS/
+runs/
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
