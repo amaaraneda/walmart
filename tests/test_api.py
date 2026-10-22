@@ -53,6 +53,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual({item["id"] for item in response.json()["models"]}, {"principal", "companero"})
         self.assertEqual(response.json()["models"][0]["id"], "companero")
+        self.assertEqual(response.json()["models"][0]["label"], "Detector de productos · Principal")
+        self.assertEqual(response.json()["models"][1]["label"], "Detector de productos · Comparativo (YOLO26n)")
 
     def test_companion_is_default(self):
         with patch.object(app_module, "companion_detector", FakeDetector()):

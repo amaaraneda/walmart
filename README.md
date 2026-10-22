@@ -20,7 +20,7 @@ Desarrollar una plataforma web que estime la disponibilidad visual de productos 
 
 - Carga de JPG, PNG o WebP completos para detectar productos visibles; la cámara se retiró de la interfaz para concentrar la validación en imágenes.
 - API FastAPI con límites básicos de formato, peso, resolución y región.
-- Detección de productos visibles con dos checkpoints YOLO seleccionables en Análisis visual. El modelo del compañero es ahora el predeterminado; YOLO26n queda para comparación. Ambos pesos se distribuyen fuera de Git.
+- Detección de productos visibles con dos checkpoints YOLO seleccionables en Análisis visual: **Detector de productos · Principal** y **Detector de productos · Comparativo (YOLO26n)**. Ambos pesos se distribuyen fuera de Git.
 - Estimación automática y provisional del porcentaje de ancho frontal cubierto por productos, por nivel y como promedio de niveles medidos. Si no puede establecer los límites, informa «no evaluable». El umbral objetivo sigue siendo **30 %**; se señala un nivel candidato bajo el umbral, pero la alerta operativa continúa desactivada. Un segundo detector puede mostrar cajas de huecos candidatas sin convertirlas en verdad-terreno.
 - Visualización de las detecciones y resultado en la web; API y Docker para ejecución local.
 

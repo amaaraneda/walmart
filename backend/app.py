@@ -22,8 +22,8 @@ app = FastAPI(title="Góndola Visión MVP", version="0.1.0")
 
 def model_options():
     return [
-        {"id": "companero", "label": "Modelo del compañero · predeterminado", "available": companion_detector.ready, "validation": companion_detector.metadata},
-        {"id": "principal", "label": "Modelo anterior · YOLO26n", "available": detector.ready, "validation": detector.metadata},
+        {"id": "companero", "label": "Detector de productos · Principal", "available": companion_detector.ready, "validation": companion_detector.metadata},
+        {"id": "principal", "label": "Detector de productos · Comparativo (YOLO26n)", "available": detector.ready, "validation": detector.metadata},
     ]
 
 
@@ -31,7 +31,7 @@ def model_options():
 def health():
     return {
         "status": "experimental" if companion_detector.ready else "needs_training",
-        "model": "YOLO del compañero",
+        "model": "Detector de productos · Principal",
         "weights_loaded": companion_detector.ready,
         "gap_model_status": "candidate_not_validated_on_project_images",
         "occupancy_status": "experimental_frontage_estimate_requires_review",
@@ -120,7 +120,7 @@ async def analyze(
         "method": occupancy["reason"],
         "empty_region_method": "complement_of_product_frontage_projection" if occupancy["shelves"] else None,
         "model_id": model_id,
-        "model": "YOLO26n fine-tuned" if model_id == "principal" else "YOLO del compañero",
+        "model": "Detector de productos · Comparativo (YOLO26n)" if model_id == "principal" else "Detector de productos · Principal",
         "validation": selected_detector.metadata,
         "annotated_image": "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode("ascii"),
         "note": "El porcentaje es una estimación de la anchura visible ocupada por productos en niveles detectados automáticamente; no mide unidades ni inventario. Puede fallar por productos omitidos o límites de góndola incorrectos. Las cajas rojas son propuestas independientes. La alerta operativa del 30 % permanece desactivada hasta validar la estimación con fotografías etiquetadas.",
