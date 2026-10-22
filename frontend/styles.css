@@ -8,3 +8,5 @@
   .demo-credentials [aria-pressed="true"]{font-weight:800;color:var(--navy)}
   .demo-credentials #demo-selection{margin-top:.35rem;color:var(--muted);line-height:1.35}
 .analysis-field.void-option{display:flex;align-items:center;gap:.65rem;font-weight:600;line-height:1.35}.analysis-field.void-option input{width:auto;padding:0;margin:0;flex:none;accent-color:#ba2943}.analysis-field.void-option:has(input:disabled){opacity:.58}
+.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:900px){.metric-grid{grid-template-columns:1fr}}
