@@ -1,0 +1,8 @@
+services:
+  gondola-mvp:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./artifacts/models:/app/artifacts/models:ro
+    restart: unless-stopped
