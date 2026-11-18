@@ -1,0 +1,29 @@
+[
+  {
+    "caso": "evaluable",
+    "entrada": "supermarket_021.jpg",
+    "http": 200,
+    "segundos": 15.664,
+    "ocupacion": 82.8,
+    "niveles": 4,
+    "detecciones": 70,
+    "motivo": "experimental_frontage_coverage_not_inventory",
+    "alerta": null
+  },
+  {
+    "caso": "no_evaluable",
+    "entrada": "supermarket_001.jpg",
+    "http": 200,
+    "segundos": 0.604,
+    "ocupacion": null,
+    "niveles": 0,
+    "detecciones": 286,
+    "motivo": "no_stable_shelf_rows",
+    "alerta": null
+  },
+  {
+    "caso": "formato_invalido",
+    "http": 415,
+    "detalle": "Solo se admiten JPG, PNG o WebP"
+  }
+]

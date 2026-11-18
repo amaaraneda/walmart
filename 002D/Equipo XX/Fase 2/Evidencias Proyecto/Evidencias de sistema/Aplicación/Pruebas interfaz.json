@@ -1,0 +1,14 @@
+[
+  {
+    "entrada": "supermarket_021.jpg",
+    "resultado": "82.8 %",
+    "http": 200,
+    "captura": "Demo caso 021.jpg"
+  },
+  {
+    "entrada": "supermarket_001.jpg",
+    "resultado": "No evaluable",
+    "http": 200,
+    "captura": "Demo caso 001.jpg"
+  }
+]
